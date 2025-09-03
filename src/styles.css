@@ -1,0 +1,10 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+.app { display: grid; grid-template-columns: 360px 1fr; height: 100vh; }
+.sidebar { padding: 16px; border-right: 1px solid #eee; overflow: auto; }
+.input, .textarea, .select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; }
+.button { background: #2563eb; color: white; border: 0; padding: 10px 14px; border-radius: 10px; cursor: pointer; }
+.button:disabled { opacity: .6; cursor: not-allowed; }
+.map { height: 100vh; width: 100%; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #eef2ff; color: #3730a3; font-size: 12px; margin-right: 6px; }
+.legend { position: absolute; bottom: 16px; left: 16px; background: rgba(255,255,255,.9); padding: 8px 12px; border-radius: 8px; font-size: 12px; }
