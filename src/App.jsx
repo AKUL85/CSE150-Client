@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
-import HeatmapLayer from "react-leaflet-heatmap-layer-v3";
+import HeatmapLayer from "./HeatmapLayer"; // ✅ custom wrapper
 import "leaflet/dist/leaflet.css";
 import "./styles.css";
+
 import Branding from "./Branding";
 import Dashboard from "./Dashboard";
 import { submitReport, getReports, getStats, health } from "./api";
@@ -44,11 +45,16 @@ export default function App() {
   const heatPoints = useMemo(
     () =>
       (reports || [])
-        .filter((r) => (filters.sector === "All" ? true : r.sector === filters.sector))
+        .filter((r) =>
+          filters.sector === "All" ? true : r.sector === filters.sector
+        )
         .map((r) => [
           r.location.lat,
           r.location.lng,
-          Math.min(1, Math.max(0.2, (r.amount ? Number(r.amount) : 1) / 1000)),
+          Math.min(
+            1,
+            Math.max(0.2, (r.amount ? Number(r.amount) : 1) / 1000)
+          ),
         ]),
     [reports, filters]
   );
@@ -92,7 +98,15 @@ export default function App() {
         <p>Submit a report anonymously. No personal info collected.</p>
 
         {error && (
-          <div style={{ background: "#fee2e2", color: "#b91c1c", padding: 10, borderRadius: 8, marginBottom: 12 }}>
+          <div
+            style={{
+              background: "#fee2e2",
+              color: "#b91c1c",
+              padding: 10,
+              borderRadius: 8,
+              marginBottom: 12,
+            }}
+          >
             {error}
           </div>
         )}
@@ -138,10 +152,17 @@ export default function App() {
             Location (drag map & click "Use Map Center"):
           </div>
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <button type="button" className="button" onClick={() => {
-              // no-op, map center is controlled below via ref alternative kept simple
-              alert("Pan/zoom the map, then click 'Use Map Center' below the map.");
-            }}>How?</button>
+            <button
+              type="button"
+              className="button"
+              onClick={() => {
+                alert(
+                  "Pan/zoom the map, then click 'Use Map Center' below the map."
+                );
+              }}
+            >
+              How?
+            </button>
           </div>
 
           <button className="button" disabled={submitting}>
@@ -172,23 +193,28 @@ export default function App() {
             <div className="badge">Avg bribe: {stats.avg_amount}</div>
           </div>
         )}
-      
-        <Dashboard />
-</div>
 
-      <MapView reports={reports} heatPoints={heatPoints} form={form} setForm={setForm} />
+        <Dashboard />
+      </div>
+
+      <MapView
+        reports={reports}
+        heatPoints={heatPoints}
+        form={form}
+        setForm={setForm}
+      />
     </div>
   );
 }
 
 function MapView({ reports, heatPoints, form, setForm }) {
-  const [center, setCenter] = useState(DEFAULT_CENTER);
+  const [center, setCenter] = useState(null); // start as null
 
   return (
     <div style={{ position: "relative" }}>
       <div className="map">
         <MapContainer
-          center={center}
+          center={DEFAULT_CENTER}
           zoom={DEFAULT_ZOOM}
           style={{ height: "100%", width: "100%" }}
           whenReady={(m) => setCenter(m.target.getCenter())}
@@ -197,17 +223,10 @@ function MapView({ reports, heatPoints, form, setForm }) {
           }}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <HeatmapLayer
-            fitBoundsOnLoad
-            fitBoundsOnUpdate
-            points={heatPoints.map((p) => ({ lat: p[0], lng: p[1], intensity: p[2] }))}
-            longitudeExtractor={(p) => p.lng}
-            latitudeExtractor={(p) => p.lat}
-            intensityExtractor={(p) => p.intensity}
-            radius={25}
-            blur={20}
-            max={1.0}
-          />
+
+          {/* ✅ Custom heatmap layer */}
+          <HeatmapLayer points={heatPoints.map((p) => [p[0], p[1], p[2]])} />
+
           {reports.map((r) => (
             <CircleMarker
               key={r.id}
@@ -216,26 +235,52 @@ function MapView({ reports, heatPoints, form, setForm }) {
             >
               <Popup>
                 <div style={{ fontSize: 12 }}>
-                  <div><b>Sector:</b> {r.sector}</div>
-                  {r.city ? <div><b>City:</b> {r.city}</div> : null}
-                  {r.amount ? <div><b>Amount:</b> {r.amount}</div> : null}
-                  {r.description ? <div style={{ marginTop: 6 }}>{r.description}</div> : null}
+                  <div>
+                    <b>Sector:</b> {r.sector}
+                  </div>
+                  {r.city ? (
+                    <div>
+                      <b>City:</b> {r.city}
+                    </div>
+                  ) : null}
+                  {r.amount ? (
+                    <div>
+                      <b>Amount:</b> {r.amount}
+                    </div>
+                  ) : null}
+                  {r.description ? (
+                    <div style={{ marginTop: 6 }}>{r.description}</div>
+                  ) : null}
                 </div>
               </Popup>
             </CircleMarker>
           ))}
         </MapContainer>
       </div>
+
+      {/* ✅ Safe legend */}
       <div className="legend">
-        <div style={{ marginBottom: 6 }}><b>Map Center:</b> {center.lat.toFixed(4)}, {center.lng.toFixed(4)}</div>
-        <button
-          className="button"
-          onClick={() =>
-            setForm({ ...form, location: { lat: center.lat, lng: center.lng } })
-          }
-        >
-          Use Map Center
-        </button>
+        {center ? (
+          <>
+            <div style={{ marginBottom: 6 }}>
+              <b>Map Center:</b> {center.lat.toFixed(4)},{" "}
+              {center.lng.toFixed(4)}
+            </div>
+            <button
+              className="button"
+              onClick={() =>
+                setForm({
+                  ...form,
+                  location: { lat: center.lat, lng: center.lng },
+                })
+              }
+            >
+              Use Map Center
+            </button>
+          </>
+        ) : (
+          <div>Loading map center…</div>
+        )}
       </div>
     </div>
   );

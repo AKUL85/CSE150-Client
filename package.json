@@ -9,14 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vgrid/react-leaflet-heatmap-layer": "^4.0.3",
     "axios": "^1.7.2",
+    "chart.js": "^4.4.1",
     "leaflet": "^1.9.4",
+    "leaflet.heat": "^0.2.0",
     "react": "^18.2.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.2.0",
-    "react-leaflet": "^4.2.1",
-    "react-leaflet-heatmap-layer-v3": "^3.0.0",
-    "chart.js": "^5.3.2",
-    "react-chartjs-2": "^5.2.0"
+    "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
